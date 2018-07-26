@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Demo</title>
+    <meta name="description" content=""/>
+    <meta name="viewport" content="width=device-width"/>
+    <base href="/"/>
+    <link rel="stylesheet" type="text/css"
+          href="/webjars/bootstrap/css/bootstrap.min.css"/>
+    <script type="text/javascript" src="/webjars/jquery/jquery.min.js"></script>
+    <script type="text/javascript"
+            src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+
+</head>
+<body ng-app="app" ng-controller="home as home">
+<h1></h1>
+<div class="container" ng-show="!home.authenticated">
+    Login: <a href="/login">click here</a>
+</div>
+<div class="container" ng-show="home.authenticated">
+    Logged in as: <span ng-bind="home.user"></span><br/>
+    Lifetime Steps: <span ng-bind="home.lifetimeSteps"></span><br/>
+    Lifetime Distance: <span ng-bind="home.lifetimeDistance"></span><br/>
+    Lifetime Floors: <span ng-bind="home.lifetimeFloors"></span><br/>
+    <!--Best Steps: <span ng-bind="home.bestStepsValue"></span> on <span ng-bind="home.bestStepsDate"></span><br/>-->
+    <!--Best Distance: <span ng-bind="home.bestDistanceValue"></span> on <span ng-bind="home.bestDistanceDate"></span><br/>-->
+    <!--Best Floors: <span ng-bind="home.bestFloorsValue"></span> on <span ng-bind="home.bestFloorsDate"></span><br/>-->
+    <!--Sleep: <span ng-bind="home.sleepDuration0"></span> minutes on <span ng-bind="home.sleepDate0"></span> starting at-->
+    <!--<span ng-bind="home.sleepStart0"></span><br/>-->
+    Average sleeping heart rate for <span ng-bind="home.HRdate"></span>: <span ng-bind="home.avgHR"></span><br/>
+    Type of Sleep: <span ng-bind="home.analysis"></span><br/>
+</div>
+
+<!--<form onsubmit="something()">-->
+    <!--Enter a date in the past three months (YYYY-MM-DD): <input id="date" type="text" size="20">-->
+    <!--<input type="submit">-->
+<!--</form>-->
+<form onsubmit="something()">
+    Choose a date:
+    <input id="date" type="date" >
+    <input type="submit">
+</form>
+
+<!--<form>-->
+    <!--Choose a number:-->
+    <!--<select id="date" onchange="something()">-->
+        <!--<option value=0>0</option>-->
+        <!--<option value=1>1</option>-->
+        <!--<option value=2>2</option>-->
+        <!--<option value=3>3</option>-->
+        <!--<option value=4>4</option>-->
+        <!--<option value=5>5</option>-->
+        <!--<option value=6>6</option>-->
+        <!--<option value=7>7</option>-->
+        <!--<option value=8>8</option>-->
+        <!--<option value=9>9</option>-->
+        <!--<option value=10>10</option>-->
+        <!--<option value=11>11</option>-->
+        <!--<option value=12>12</option>-->
+        <!--<option value=13>13</option>-->
+        <!--<option value=14>14</option>-->
+        <!--<option value=15>15</option>-->
+        <!--<option value=16>16</option>-->
+        <!--<option value=17>17</option>-->
+        <!--<option value=18>18</option>-->
+        <!--<option value=19>19</option>-->
+        <!--<option value=20>20</option>-->
+        <!--<option value=21>21</option>-->
+        <!--<option value=22>22</option>-->
+        <!--<option value=23>23</option>-->
+        <!--<option value=24>24</option>-->
+        <!--<option value=25>25</option>-->
+        <!--<option value=26>26</option>-->
+        <!--<option value=27>27</option>-->
+        <!--<option value=28>28</option>-->
+        <!--<option value=29>29</option>-->
+    <!--</select>-->
+<!--</form>-->
+<div id="chartContainer" style="height: 370px; width: 100%;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+<script type="text/javascript" src="/webjars/angularjs/angular.min.js"></script>
+<script type="text/javascript">
+
+		angular.module("app", []).controller("home", function($http) {
+			var self = this;
+
+			$http.get("/user").success(function(data) {
+				self.user = data.userAuthentication.details.user.fullName;
+				self.authenticated = true;
+			}).error(function() {
+				self.user = "N/A";
+				self.authenticated = false;
+			});
+
+            $http.get("/lifetime-activity").success(function(data) {
+                self.lifetimeSteps = data.steps.toLocaleString();
+                self.lifetimeFloors = data.floors.toLocaleString();
+                self.lifetimeDistance = data.distance.toLocaleString();
+            }).error(function() {
+                self.lifetimeSteps = "N/A";
+            });
+
+            something = function() {
+                chosen = document.forms[0].date.value;
+
+                var today = new Date();
+                var dd = today.getDate();
+                var mm = today.getMonth()+1; //January is 0!
+                var yyyy = today.getFullYear();
+                if(dd<10) {
+                    dd = '0'+dd
+                }
+                if(mm<10) {
+                    mm = '0'+mm
+                }
+                today = yyyy + '-' + mm + '-' + dd;
+
+                <!--$http.get("/multi-sleep-log").success(function(data) {-->
+                <!--if (data.sleep[parseInt(chosen)]==null) {-->
+                    <!--self.sleepDate0="N/A";-->
+                    <!--self.sleepDuration0="N/A";-->
+                    <!--self.sleepStart0="N/A";-->
+                <!--}-->
+                <!--else {-->
+                    <!--self.sleepDate0=data.sleep[parseInt(chosen)].dateOfSleep.toLocaleString();-->
+                    <!--self.sleepDuration0=((data.sleep[parseInt(chosen)].duration)/60000).toLocaleString();-->
+                    <!--self.sleepStart0=data.sleep[parseInt(chosen)].startTime.toLocaleString();-->
+                <!--}-->
+                <!--}).error(function() {-->
+                    <!--self.sleepDate0 = "N/A";-->
+                    <!--self.sleepDuration0 = "N/A";-->
+                <!--});-->
+
+
+                $http.get("/intraday-heart-rate/"+chosen+"/"+today).success(function(data) {
+                    var sum = 0;
+                    var i;
+                    for (i = 0; i < data[2].length; i++) {
+                        sum+=data[2][i];
+                    }
+                    var avg = sum/data[2].length;
+                    self.avgHR=avg;
+                    self.HRdate=data[0][0];
+                    var movingMeans = [];
+                    var movingMeanTime=[];
+                    var movingMeanValue = [];
+                    var j;
+                    for (j=5; j < data[2].length-5; j++) {
+                        movingMeanTime.push(data[1][j]);
+                        movingMeanValue.push((data[2][j-5]+data[2][j-4]+data[2][j-3]+data[2][j-2]+data[2][j-1]+data[2][j]+data[2][j+1]+data[2][j+2]+data[2][j+3]+data[2][j+4]+data[2][j+5])/11);
+                    }
+                    movingMeans.push(movingMeanTime);
+                    movingMeans.push(movingMeanValue);
+                    graph(data, movingMeans);
+
+                    self.analysis=analyze(data, movingMeans);
+                }).error(function() {
+
+                });
+            }
+
+
+
+		});
+
+		graph = function (dates, movingMeans) {
+            var start=new Date(parseInt(dates[0][0].substring(0,4)), parseInt(dates[0][0].substring(5,7))-1, parseInt(dates[0][0].substring(8)), parseInt(dates[1][0].substring(0,2)), parseInt(dates[1][0].substring(3,5)), parseInt(dates[1][0].substring(6)));
+            var end=new Date(parseInt(dates[0][1].substring(0,4)), parseInt(dates[0][1].substring(5,7))-1, parseInt(dates[0][1].substring(8)), parseInt(dates[1][dates[1].length-1].substring(0,2)), parseInt(dates[1][dates[1].length-1].substring(3,5)), parseInt(dates[1][dates[1].length-1].substring(6)));
+            var datesPoints=[];
+            var i;
+            for(i = 0; i < dates[1].length; i++) {
+                if (parseInt(dates[1][i].substring(0,2))<=12) {
+                    datesPoints.push({x: new Date(end.getFullYear(),end.getMonth(),end.getDate(),parseInt(dates[1][i].substring(0,2)),parseInt(dates[1][i].substring(3,5)),parseInt(dates[1][i].substring(6))), y: dates[2][i] });
+                }
+                if (parseInt(dates[1][i].substring(0,2))>12) {
+                    datesPoints.push({x: new Date(start.getFullYear(),start.getMonth(),start.getDate(),parseInt(dates[1][i].substring(0,2)),parseInt(dates[1][i].substring(3,5)),parseInt(dates[1][i].substring(6))), y: dates[2][i] });
+                }
+            }
+
+            var datesPointsMM=[];
+            var j;
+            for(j = 0; j < movingMeans[0].length; j++) {
+                if (parseInt(movingMeans[0][j].substring(0,2))<=12) {
+                    datesPointsMM.push({x: new Date(end.getFullYear(),end.getMonth(),end.getDate(),parseInt(movingMeans[0][j].substring(0,2)),parseInt(movingMeans[0][j].substring(3,5)),parseInt(movingMeans[0][j].substring(6))), y: movingMeans[1][j] });
+                }
+                if (parseInt(movingMeans[0][j].substring(0,2))>12) {
+                    datesPointsMM.push({x: new Date(start.getFullYear(),start.getMonth(),start.getDate(),parseInt(movingMeans[0][j].substring(0,2)),parseInt(movingMeans[0][j].substring(3,5)),parseInt(movingMeans[0][j].substring(6))), y: movingMeans[1][j] });
+                }
+            }
+
+            var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            var chart = new CanvasJS.Chart("chartContainer", {
+                animationEnabled: true,
+                exportEnabled: true,
+                title:{
+                    <!--text: "Sleeping Heart Rate from "+days[start.getDay()]+" "+months[start.getMonth()]+" "+start.getDate()+" "+start.getFullYear()+" "+start.getHours()+":"+start.getMinutes()+":"+start.getSeconds()+" to "+days[end.getDay()]+" "+months[end.getMonth()]+" "+end.getDate()+" "+end.getFullYear()+" "+end.getHours()+":"+end.getMinutes()+":"+end.getSeconds(),-->
+                    text: "Sleeping Heart Rate from " + start.toString().substring(0,24) + " to " + end.toString().substring(0,24),
+                },
+                axisY:{
+                    title: "BPM",
+                    includeZero: false,
+                    interval: 10,
+                    suffix: "",
+                    valueFormatString: "#"
+                },
+                data: [{
+                    type: "line",
+                    yValueFormatString: "",
+                    xValueFormatString: "HH:mm",
+                    markerSize: 5,
+
+                    dataPoints: datesPoints
+
+
+               },
+               {
+                    type: "line",
+                    yValueFormatString: "",
+                    xValueFormatString: "HH:mm",
+                    markerSize: 5,
+
+                    dataPoints: datesPointsMM
+
+
+               }]
+            });
+        chart.render();
+
+        }
+
+
+        analyze = function(dates, movingMeans) {
+            console.log("Date: " + dates[0][1]);
+            console.log("first value: " + dates[2][0]);
+            console.log("middle value: " + dates[2][Math.round(dates[2].length/2)] + " at " + dates[1][Math.round(dates[2].length/2)]);
+            console.log("last value: " + dates[2][dates[2].length-1]);
+            console.log("first movingMean: " + movingMeans[1][0]);
+            console.log("middle movingMean: " + movingMeans[1][Math.round(movingMeans[1].length/2)]);
+            console.log("last movingMean: " + movingMeans[1][movingMeans[1].length-1]);
+
+            var lowest = dates[2][0];
+            var lowestTime = dates[1][0];
+            var i;
+            for (i in dates[2]) {
+                if (dates[2][i]<lowest) {
+                    lowest = dates[2][i];
+                    lowestTime = dates[1][i];
+                }
+            }
+            console.log("lowest value: " + lowest + " at " + lowestTime);
+
+            var highest = dates[2][0];
+            var highestTime = dates[1][0];
+            var j;
+            for (j in dates[2]) {
+                if (dates[2][j]>highest) {
+                    highest = dates[2][j];
+                    highestTime = dates[1][j];
+                }
+            }
+            console.log("highest value: " + highest + " at " + highestTime);
+
+
+            var firstHalfMean;
+            var firstHalfSum = 0;
+            var k;
+            for (k=0; k<=((dates[2].length)/2); k++) {
+                firstHalfSum+=dates[2][k];
+            }
+            firstHalfMean = firstHalfSum/(dates[2].length/2);
+            console.log("firstHalfMean: " + firstHalfMean);
+
+            var secondHalfMean;
+            var secondHalfSum = 0;
+            var k;
+            for (k=dates[2].length-1; k>((dates[2].length)/2); k--) {
+                secondHalfSum+=dates[2][k];
+            }
+            secondHalfMean = secondHalfSum/(dates[2].length/2);
+            console.log("secondHalfMean: " + secondHalfMean);
+
+
+            var firstHalfMovingMean;
+            var firstHalfMovingSum = 0;
+            var h;
+            for (h=0; h<=((movingMeans[1].length)/2); h++) {
+                firstHalfMovingSum+=movingMeans[1][h];
+            }
+            firstHalfMovingMean = firstHalfMovingSum/(movingMeans[1].length/2);
+            console.log("firstHalfMovingMean: " + firstHalfMovingMean);
+
+            var secondHalfMovingMean;
+            var secondHalfMovingSum = 0;
+            var h;
+            for (h=movingMeans[1].length-1; h>((movingMeans[1].length)/2); h--) {
+                secondHalfMovingSum+=movingMeans[1][h];
+            }
+            secondHalfMovingMean = secondHalfMovingSum/(movingMeans[1].length/2);
+            console.log("secondHalfMovingMean: " + secondHalfMovingMean);
+
+
+            var firstQuarterMean;
+            var firstQuarterSum = 0;
+            var i;
+            for (i=0; i<Math.round((dates[2].length)/4); i++) {
+                firstQuarterSum+=dates[2][i];
+            }
+            firstQuarterMean = firstQuarterSum/(dates[2].length/4);
+            console.log("firstQuarterMean: " + firstQuarterMean);
+
+            var secondQuarterMean;
+            var secondQuarterSum = 0;
+            var i;
+            for (i=Math.round(dates[2].length/4); i<((dates[2].length)/2); i++) {
+                secondQuarterSum+=dates[2][i];
+            }
+            secondQuarterMean = secondQuarterSum/(dates[2].length/4);
+            console.log("secondQuarterMean: " + secondQuarterMean);
+
+            var thirdQuarterMean;
+            var thirdQuarterSum = 0;
+            var i;
+            for (i=Math.round(dates[2].length/2); i<Math.round((dates[2].length)*3/4); i++) {
+                thirdQuarterSum+=dates[2][i];
+            }
+            thirdQuarterMean = thirdQuarterSum/(dates[2].length/4);
+            console.log("thirdQuarterMean: " + thirdQuarterMean);
+
+            var fourthQuarterMean;
+            var fourthQuarterSum = 0;
+            var i;
+            for (i=Math.round(dates[2].length*3/4); i<((dates[2].length)); i++) {
+                fourthQuarterSum+=dates[2][i];
+            }
+            fourthQuarterMean = fourthQuarterSum/(dates[2].length/4);
+            console.log("fourthQuarterMean: " + fourthQuarterMean);
+
+
+            var firstQuarterMovingMean;
+            var firstQuarterMovingSum = 0;
+            var i;
+            for (i=0; i<Math.round((movingMeans[1].length)/4); i++) {
+                firstQuarterMovingSum+=movingMeans[1][i];
+            }
+            firstQuarterMovingMean = firstQuarterMovingSum/(movingMeans[1].length/4);
+            console.log("firstQuarterMovingMean: " + firstQuarterMovingMean);
+
+            var secondQuarterMovingMean;
+            var secondQuarterMovingSum = 0;
+            var i;
+            for (i=Math.round(movingMeans[1].length/4); i<((movingMeans[1].length)/2); i++) {
+                secondQuarterMovingSum+=movingMeans[1][i];
+            }
+            secondQuarterMovingMean = secondQuarterMovingSum/(movingMeans[1].length/4);
+            console.log("secondQuarterMovingMean: " + secondQuarterMovingMean);
+
+            var thirdQuarterMovingMean;
+            var thirdQuarterMovingSum = 0;
+            var i;
+            for (i=Math.round(movingMeans[1].length/2); i<Math.round((movingMeans[1].length)*3/4); i++) {
+                thirdQuarterMovingSum+=movingMeans[1][i];
+            }
+            thirdQuarterMovingMean = thirdQuarterMovingSum/(movingMeans[1].length/4);
+            console.log("thirdQuarterMovingMean: " + thirdQuarterMovingMean);
+
+            var fourthQuarterMovingMean;
+            var fourthQuarterMovingSum = 0;
+            var i;
+            for (i=Math.round(movingMeans[1].length*3/4); i<((movingMeans[1].length)); i++) {
+                fourthQuarterMovingSum+=movingMeans[1][i];
+            }
+            fourthQuarterMovingMean = fourthQuarterMovingSum/(movingMeans[1].length/4);
+            console.log("fourthQuarterMovingMean: " + fourthQuarterMovingMean);
+
+            <!--hammock test-->
+            if ((firstQuarterMean>secondQuarterMean) || ((secondQuarterMean-firstQuarterMean)<0.75)) {
+                if ((fourthQuarterMean>thirdQuarterMean) || ((thirdQuarterMean-fourthQuarterMean)<0.75)) {
+                    return "Hammock—you had a good night's sleep!";
+                    <!--if (dates[1][Math.round(dates[1].length/2)].substring(0,2)===lowestTime.substring(0,2)) {-->
+                        <!--if (Math.abs(parseInt(dates[1][Math.round(dates[1].length/2)].substring(3,5))-parseInt(lowestTime.substring(3,5)))<15) {-->
+                            <!---->
+                        <!--}-->
+                    <!--}-->
+                }
+            }
+
+            <!--downward slope test-->
+            if ((firstQuarterMean>secondQuarterMean) && (thirdQuarterMean>fourthQuarterMean)) {
+                if ((firstQuarterMean>thirdQuarterMean) && (secondQuarterMean>fourthQuarterMean)) {
+                    return "Downward Slope—your metabolism is working overtime. You may have had a late meal.";
+                }
+            }
+
+            <!--dune test-->
+            if ((firstHalfMean>dates[2][0]) || (dates[2][0]-firstHalfMean)<0.75) {
+                if (secondQuarterMean>firstQuarterMean) {
+                    return "Dune—you may have slept later than usual.";
+                }
+            }
+
+            <!--random-->
+            else {
+                return "none";
+            }
+
+        }
+
+
+
+
+
+
+</script>
+</body>
+</html>
+<!--current.getFullYear(),current.getMonth(),current.getDay(),parseInt(dates[0].get(0).substring(0,2)),parseInt(dates[0].get(0).substring(3,5)),parseInt(dates[0].get(0).substring(6))-->
+<!--current.getMonth(),current.getDay(),parseInt(dates[0][0].substring(0,2)),parseInt(dates[0][0].substring(3,5)),parseInt(dates[0][0].substring(6)))-->
+<!--$http.get("/lifetime-activity").success(function(data) {-->
+<!--self.lifetimeSteps = data.steps.toLocaleString();-->
+<!--self.lifetimeFloors = data.floors.toLocaleString();-->
+<!--self.lifetimeDistance = data.distance.toLocaleString();-->
+<!--}).error(function() {-->
+<!--self.lifetimeSteps = "N/A";-->
+<!--});-->
+<!--$http.get("/best-activity").success(function(data) {-->
+<!--if (data.steps==null) {-->
+<!--self.bestStepsValue="N/A";-->
+<!--self.bestStepsDate="N/A";-->
+<!--}-->
+<!--else {-->
+<!--self.bestStepsValue = data.steps.value.toLocaleString();-->
+<!--self.bestStepsDate = data.steps.date.toLocaleString();-->
+<!--}-->
+<!--if (data.distance==null) {-->
+<!--self.bestDistanceValue="N/A";-->
+<!--self.bestDistanceDate="N/A";-->
+<!--}-->
+<!--else {-->
+<!--self.bestDistanceValue = data.distance.value.toLocaleString();-->
+<!--self.bestDistanceDate = data.distance.date.toLocaleString();-->
+<!--}-->
+<!--if (data.floors==null) {-->
+<!--self.bestFloorsValue="N/A";-->
+<!--self.bestFloorsDate="N/A";-->
+<!--}-->
+<!--else {-->
+<!--self.bestFloorsValue = data.floors.value.toLocaleString();-->
+<!--self.bestFloorsDate = data.floors.date.toLocaleString();-->
+<!--}-->
+<!--}).error(function() {-->
+<!--self.bestStepsValue = "N/A";-->
+<!--self.bestStepsDate = "N/A";-->
+<!--self.bestDistanceValue = "N/A";-->
+<!--self.bestDistanceDate = "N/A";-->
+<!--self.bestFloorsValue = "N/A";-->
+<!--self.bestFloorsDate = "N/A";-->
+<!--});-->
+<!--$http.get("/steps-log").success(function(data) {-->
+<!---->
+
+<!--}).error(function() {-->
+<!--self.intradaytime0="N/A";-->
+<!--self.intradayvalue0="N/A";-->
+<!--});-->
+
+<!--07/07 hammock-->
+<!--04/05 hammock-->
+<!--06/30 downslope-->
+<!--07/14 weird, should be hammock-->
+<!--06/25 dune-->
+<!--06/11-->
+<!--06/06-->
+<!--06/21 hammock-->
